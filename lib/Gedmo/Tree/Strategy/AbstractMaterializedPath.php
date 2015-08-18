@@ -5,7 +5,6 @@ namespace Gedmo\Tree\Strategy;
 use Gedmo\Tree\Strategy;
 use Gedmo\Tree\TreeListener;
 use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\ODM\MongoDB\UnitOfWork as MongoDBUnitOfWork;
 use Gedmo\Mapping\Event\AdapterInterface;
 use Gedmo\Exception\RuntimeException;
 use Gedmo\Exception\TreeLockingException;
@@ -321,12 +320,9 @@ abstract class AbstractMaterializedPath implements Strategy
             $changes[$config['level']] = array(null, $level);
         }
 
-        if (!$uow instanceof MongoDBUnitOfWork) {
-            $ea->setOriginalObjectProperty($uow, $oid, $config['path'], $path);
-            $uow->scheduleExtraUpdate($node, $changes);
-        } else {
-            $ea->recomputeSingleObjectChangeSet($uow, $meta, $node);
-        }
+        $uow->scheduleExtraUpdate($node, $changes);
+        $ea->setOriginalObjectProperty($uow, $oid, $config['path'], $path);
+
         if (isset($config['path_hash'])) {
             $ea->setOriginalObjectProperty($uow, $oid, $config['path_hash'], $pathHash);
         }

@@ -502,7 +502,6 @@ In case if you want the slug to regenerate itself based on sluggable fields, set
 $entity = $em->find('Entity\Something', $id);
 $entity->setSlug(null);
 
-$em->persist($entity);
 $em->flush();
 ```
 
@@ -523,9 +522,9 @@ $em->flush();
 echo $entity->getSlug(); // outputs: "the-required-slug-set-manually"
 ```
 
-### Using TranslatableListener to translate our slug
+### Using TranslationListener to translate our slug
 
-If you want to attach **TranslatableListener** also add it to EventManager after
+If you want to attach **TranslationListener** also add it to EventManager after
 the **SluggableListener**. It is important because slug must be generated first
 before the creation of it`s translation.
 
@@ -534,7 +533,7 @@ before the creation of it`s translation.
 $evm = new \Doctrine\Common\EventManager();
 $sluggableListener = new \Gedmo\Sluggable\SluggableListener();
 $evm->addEventSubscriber($sluggableListener);
-$translatableListener = new \Gedmo\Translatable\TranslatableListener();
+$translatableListener = new \Gedmo\Translatable\TranslationListener();
 $translatableListener->setTranslatableLocale('en_us');
 $evm->addEventSubscriber($translatableListener);
 // now this event manager should be passed to entity manager constructor

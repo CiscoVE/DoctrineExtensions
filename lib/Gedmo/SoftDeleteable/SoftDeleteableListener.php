@@ -4,7 +4,6 @@ namespace Gedmo\SoftDeleteable;
 
 use Gedmo\Mapping\MappedEventSubscriber;
 use Doctrine\Common\EventArgs;
-use Doctrine\ODM\MongoDB\UnitOfWork as MongoDBUnitOfWork;
 
 /**
  * SoftDeleteable listener
@@ -77,13 +76,9 @@ class SoftDeleteableListener extends MappedEventSubscriber
 
                 $om->persist($object);
                 $uow->propertyChanged($object, $config['fieldName'], $oldValue, $date);
-                if ($uow instanceof MongoDBUnitOfWork && !method_exists($uow, 'scheduleExtraUpdate')) {
-                    $ea->recomputeSingleObjectChangeSet($uow, $meta, $object);
-                } else {
-                    $uow->scheduleExtraUpdate($object, array(
-                        $config['fieldName'] => array($oldValue, $date),
-                    ));
-                }
+                $uow->scheduleExtraUpdate($object, array(
+                    $config['fieldName'] => array($oldValue, $date),
+                ));
 
                 $evm->dispatchEvent(
                     self::POST_SOFT_DELETE,

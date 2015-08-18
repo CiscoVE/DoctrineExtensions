@@ -115,10 +115,10 @@ class Article
     private $updatedBy;
 
     /**
-     * @var string $contentChangedBy
+     * @var datetime $contentChangedBy
      *
      * @ORM\Column(name="content_changed_by", type="string", nullable=true)
-     * @Gedmo\Blameable(on="change", fields={"title", "body"})
+     * @Gedmo\Timestampable(on="change", field={"title", "body"})
      */
     private $contentChangedBy;
 
@@ -212,7 +212,7 @@ class Article
     /**
      * @var User $contentChangedBy
      *
-     * @Gedmo\Blameable(on="change", fields={"title", "body"})
+     * @Gedmo\Timestampable(on="change", fields={"title", "body"})
      * @ORM\ManyToOne(targetEntity="Path\To\Entity\User")
      * @ORM\JoinColumn(name="content_changed_by", referencedColumnName="id")
      */

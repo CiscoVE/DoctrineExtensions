@@ -64,37 +64,6 @@ class SortableTest extends BaseTestCaseORM
     /**
      * @test
      */
-    public function testMoveLastPosition()
-    {
-        for ($i = 2; $i <= 10; $i++) {
-            $node = new Node();
-            $node->setName("Node".$i);
-            $node->setPath("/");
-            $this->em->persist($node);
-        }
-        $this->em->flush();  
-
-        $repo = $this->em->getRepository(self::NODE);
-
-        $node = $repo->findOneByPosition(0);
-        $node->setPosition(-1);
-        $this->em->flush();
-
-        for ($i = 0; $i <= 8; $i++) {
-            $node = $repo->findOneByPosition($i);
-            $this->assertNotNull($node);
-            $this->assertEquals('Node'.($i+2), $node->getName());
-        }
-
-        $node = $repo->findOneByPosition(9);
-        $this->assertNotNull($node);
-        $this->assertEquals('Node1', $node->getName());
-    
-    }
-
-    /**
-     * @test
-     */
     public function shouldSortManyNewNodes()
     {
         for ($i = 2; $i <= 10; $i++) {
@@ -396,45 +365,6 @@ class SortableTest extends BaseTestCaseORM
 
         $this->assertEquals("Item1", $items[0]->getName());
         $this->assertEquals("Category1", $items[0]->getCategory()->getName());
-    }
-
-    /**
-     * @test
-     */
-    public function shouldInsertInbetween()
-    {
-        $this->markTestIncomplete('Currently it is not supported to change the position of a record and insert a new one in front of it in one step.');
-
-        $item1 = new Item();
-        $item1->setName("Item1");
-        $this->em->persist($item1);
-
-        $item3 = new Item();
-        $item3->setName("Item3");
-        $this->em->persist($item3);
-
-        $this->em->flush();
-
-        // update $item3's position
-        $item3->setPosition(2);
-
-        // and insert a further item between $item1 and $item3
-        $item2 = new Item();
-        $item2->setName("Item2");
-        $item2->setPosition(1);
-        $this->em->persist($item2);
-
-        $this->em->flush();
-
-        $repo = $this->em->getRepository(self::ITEM);
-        $items = $repo->findBy(array(), array('position' => 'asc'));
-
-        $this->assertEquals("Item1", $items[0]->getName());
-        $this->assertEquals(0, $items[0]->getPosition());
-        $this->assertEquals("Item2", $items[1]->getName());
-        $this->assertEquals(1, $items[1]->getPosition());
-        $this->assertEquals("Item3", $items[2]->getName());
-        $this->assertEquals(2, $items[2]->getPosition());
     }
 
     /**

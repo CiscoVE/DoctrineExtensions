@@ -67,7 +67,8 @@ class MaterializedPath extends AbstractMaterializedPath
                 $config['lock_time'] => array(null, $lockTimeValue),
             );
 
-            $ea->recomputeSingleObjectChangeSet($uow, $meta, $root);
+            $uow->scheduleExtraUpdate($root, $changes);
+            $ea->setOriginalObjectProperty($uow, $oid, $config['lock_time'], $lockTimeValue);
         }
     }
 
@@ -89,7 +90,8 @@ class MaterializedPath extends AbstractMaterializedPath
                 $config['lock_time'] => array(null, null),
             );
 
-            $ea->recomputeSingleObjectChangeSet($uow, $meta, $root);
+            $uow->scheduleExtraUpdate($root, $changes);
+            $ea->setOriginalObjectProperty($uow, $oid, $config['lock_time'], $lockTimeValue);
 
             unset($this->rootsOfTreesWhichNeedsLocking[$oid]);
         }

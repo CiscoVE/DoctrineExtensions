@@ -17,22 +17,11 @@ use Doctrine\ORM\Internal\Hydration\ObjectHydrator as BaseObjectHydrator;
 class ObjectHydrator extends BaseObjectHydrator
 {
     /**
-     * State of skipOnLoad for listener between hydrations
-     *
-     * @see ObjectHydrator::prepare()
-     * @see ObjectHydrator::cleanup()
-     *
-     * @var bool
-     */
-    private $savedSkipOnLoad;
-
-    /**
      * {@inheritdoc}
      */
     protected function prepare()
     {
         $listener = $this->getTranslatableListener();
-        $this->savedSkipOnLoad = $listener->isSkipOnLoad();
         $listener->setSkipOnLoad(true);
         parent::prepare();
     }
@@ -44,7 +33,7 @@ class ObjectHydrator extends BaseObjectHydrator
     {
         parent::cleanup();
         $listener = $this->getTranslatableListener();
-        $listener->setSkipOnLoad($this->savedSkipOnLoad !== null ? $this->savedSkipOnLoad : false);
+        $listener->setSkipOnLoad(false);
     }
 
     /**

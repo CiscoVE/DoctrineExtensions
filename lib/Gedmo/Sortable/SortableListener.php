@@ -4,9 +4,10 @@ namespace Gedmo\Sortable;
 
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\Common\Persistence\Proxy;
 use Doctrine\Common\Util\ClassUtils;
+use Doctrine\ORM\UnitOfWork;
 use Gedmo\Mapping\MappedEventSubscriber;
+use Doctrine\ORM\Proxy\Proxy;
 use Gedmo\Sortable\Mapping\Event\SortableAdapter;
 
 /**
@@ -229,7 +230,6 @@ class SortableListener extends MappedEventSubscriber
         $uow = $em->getUnitOfWork();
 
         $changed = false;
-        $groupHasChanged = false;
         $changeSet = $ea->getObjectChangeSet($uow, $object);
 
         // Get groups
@@ -247,13 +247,7 @@ class SortableListener extends MappedEventSubscriber
         if ($changed) {
             $oldHash = $this->getHash($oldGroups, $config);
             $this->maxPositions[$oldHash] = $this->getMaxPosition($ea, $meta, $config, $object, $oldGroups);
-            if (array_key_exists($config['position'], $changeSet)) {
-                $oldPosition = $changeSet[$config['position']][0];
-            } else {
-                $oldPosition = $meta->getReflectionProperty($config['position'])->getValue($object);
-            }
-            $this->addRelocation($oldHash, $config['useObjectClass'], $oldGroups, $oldPosition + 1, $this->maxPositions[$oldHash] + 1, -1);
-            $groupHasChanged = true;
+            $this->addRelocation($oldHash, $config['useObjectClass'], $oldGroups, $meta->getReflectionProperty($config['position'])->getValue($object) + 1, $this->maxPositions[$oldHash] + 1, -1);
         }
 
         if (array_key_exists($config['position'], $changeSet)) {
@@ -266,9 +260,6 @@ class SortableListener extends MappedEventSubscriber
             $oldPosition = -1;
             $newPosition = -1;
             // specific case
-        }
-        if ($groupHasChanged) {
-            $oldPosition = -1;
         }
         if (!$changed) {
             return;
@@ -284,11 +275,7 @@ class SortableListener extends MappedEventSubscriber
 
         // Compute position if it is negative
         if ($newPosition < 0) {
-            if ($oldPosition === -1) {
-              $newPosition += $this->maxPositions[$hash] + 2; // position == -1 => append at end of list
-            } else {
-              $newPosition += $this->maxPositions[$hash] + 1; // position == -1 => append at end of list
-            }
+            $newPosition += $this->maxPositions[$hash] + 2; // position == -1 => append at end of list
 
             if ($newPosition < 0) {
                 $newPosition = 0;
@@ -494,7 +481,7 @@ class SortableListener extends MappedEventSubscriber
         // scheduled for insert, it has no identifier yet and is obviously new
         // see issue #226
         foreach ($groups as $val) {
-            if (is_object($val) && ($uow->isScheduledForInsert($val) || !$em->getMetadataFactory()->isTransient(ClassUtils::getClass($val)) && $uow::STATE_MANAGED !== $ea->getObjectState($uow, $val))) {
+            if (is_object($val) && ($uow->isScheduledForInsert($val) || !$em->getMetadataFactory()->isTransient(ClassUtils::getClass($val)) && UnitOfWork::STATE_MANAGED !== $ea->getObjectState($uow, $val))) {
                 return -1;
             }
         }
